@@ -143,6 +143,7 @@ impl EnvProcessInterface {
         let flink = get_flink(&self.flinks_folder[..], proc_id);
         let (mut parent_socket, mut poll, mut events) = self.uninitialized_proc_id_parent_socket_map.remove(&proc_id).ok_or_else(|| InvalidStateError::new_err(format!("add_proc_package was called with proc_id {proc_id}, which didn't have a corresponding entry in uninitialized_proc_id_parent_socket_map.")))?;
         let child_addr = sync_with_ep(&mut parent_socket, &mut poll, &mut events)?;
+        poll.registry().deregister(&mut parent_socket)?;
 
         let shmem = ShmemConf::new()
             .size(self.shm_buffer_size)
