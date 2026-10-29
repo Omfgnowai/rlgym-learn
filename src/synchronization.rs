@@ -35,7 +35,10 @@ pub fn recvfrom_byte(
         }
         let v = socket.recv_from(&mut [0]);
         match v {
-            Ok((_, send_addr)) => return Ok(send_addr),
+            Ok((_, send_addr)) => {
+                poll.registry().reregister(socket, Token(0), Interest::READABLE)?;
+                return Ok(send_addr);
+            }
             Err(e) if e.kind() == io::ErrorKind::WouldBlock => continue,
             Err(e) => Err(e)?,
         }
